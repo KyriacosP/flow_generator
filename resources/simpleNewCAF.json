@@ -1,0 +1,136 @@
+{
+  "label": "Test post",
+  "nodes":
+  [
+    {
+      "id": "1a8025f9.659d4a",
+      "type": "http in",
+      "z": "3b3692ad.eb1b06",
+      "name": "",
+      "url": "/getTest/:SSN",
+      "method": "get",
+      "upload": false,
+      "swaggerDoc": "",
+      "x": 130,
+      "y": 60,
+      "wires": [
+        [
+          "ef81345c.812a38"
+        ]
+      ]
+    },
+    {
+      "id": "ef81345c.812a38",
+      "type": "function",
+      "z": "3b3692ad.eb1b06",
+      "name": "Construct first request",
+      "func": "var res={};\nflow.set(\"res\",msg.payload);\n\nvar SSN=msg.req.params.SSN;\nmsg.url=\"http://147.102.19.105:1880/CAF/patient/\"+SSN;\nreturn msg;",
+      "outputs": 1,
+      "noerr": 0,
+      "x": 400,
+      "y": 60,
+      "wires": [
+        [
+          "e16f5864.3726c8"
+        ]
+      ]
+    },
+    {
+      "id": "b2ff8bad.42ec9",
+      "type": "http response",
+      "z": "3b3692ad.eb1b06",
+      "name": "",
+      "statusCode": "",
+      "headers": {},
+      "x": 590,
+      "y": 240,
+      "wires": []
+    },
+    {
+      "id": "e16f5864.3726c8",
+      "type": "http request",
+      "z": "3b3692ad.eb1b06",
+      "name": "",
+      "method": "GET",
+      "ret": "txt",
+      "paytoqs": false,
+      "url": "",
+      "tls": "",
+      "proxy": "",
+      "authType": "basic",
+      "x": 130,
+      "y": 160,
+      "wires": [
+        [
+          "bbae89f7.2489d"
+        ]
+      ]
+    },
+    {
+      "id": "bbae89f7.2489d",
+      "type": "function",
+      "z": "3b3692ad.eb1b06",
+      "name": "Construct second request",
+      "func": "msg.payload=JSON.parse(msg.payload);\nvar res=flow.get(\"res\");\nres.patientId=msg.payload.patientId;\nres.name=msg.payload.name;\nflow.set(\"res\",res);\n\nvar SSN=msg.req.params.SSN;\nmsg.url=\"http://147.102.19.105:1880/CAF/patient/\"+SSN+\"/blood-test/summary\";\nreturn msg;",
+      "outputs": 1,
+      "noerr": 0,
+      "x": 410,
+      "y": 160,
+      "wires": [
+        [
+          "92dd2eda.733fc8"
+        ]
+      ]
+    },
+    {
+      "id": "92dd2eda.733fc8",
+      "type": "http request",
+      "z": "3b3692ad.eb1b06",
+      "name": "",
+      "method": "GET",
+      "ret": "txt",
+      "paytoqs": false,
+      "url": "",
+      "authType": "basic",
+      "x": 110,
+      "y": 240,
+      "wires": [
+        [
+          "78653753.2372a"
+        ]
+      ]
+    },
+    {
+      "id": "78653753.2372a",
+      "type": "function",
+      "z": "3b3692ad.eb1b06",
+      "name": "Prepare Response",
+      "func": "msg.payload=JSON.parse(msg.payload);\nvar res=flow.get(\"res\");\nres.date=msg.payload.date;\nres.cholesterol=msg.payload.cholesterol;\nflow.set(\"res\",res);\n\nconsole.log(res);\nmsg.payload=res;\nreturn msg;",
+      "outputs": 1,
+      "noerr": 0,
+      "x": 330,
+      "y": 240,
+      "wires": [
+        [
+          "f861ac80.c329a8",
+          "b2ff8bad.42ec9"
+        ]
+      ]
+    },
+    {
+      "id": "f861ac80.c329a8",
+      "type": "debug",
+      "z": "3b3692ad.eb1b06",
+      "name": "",
+      "active": true,
+      "tosidebar": true,
+      "console": false,
+      "tostatus": false,
+      "complete": "true",
+      "targetType": "full",
+      "x": 540,
+      "y": 340,
+      "wires": []
+    }
+  ]
+}
