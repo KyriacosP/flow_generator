@@ -1,4 +1,3 @@
-import flowExample from '../resources/simpleNewCAF';
 import fetch from 'node-fetch';
 import {HttpNodeIn,HttpNodeResponse,HttpNodeRequest} from '../nodes/httpNodes';
 import FunctionNode from '../nodes/functionNodes';
@@ -23,9 +22,6 @@ class FlowsController {
       f.addNode(new HttpNodeIn(1,0,"/testEND"));
       f.addNode(new FunctionNode(2,0,"console.log(\"works\"); return msg;"))
       f.addNode(new HttpNodeResponse(3,0));
-      console.log(typeof f);
-      console.log(f);
-      console.log(JSON.stringify(f));
       fetch('http://localhost:1880/flow', {
         method: 'POST',
         headers: {
@@ -34,17 +30,28 @@ class FlowsController {
         },
         body: JSON.stringify(f)
       })
+        .then(res=>{
+          if(!res.ok){
+            throw Error(res);
+          }
+          return res;
+        })
         .then(data=>data.json())
-        .then(data=>console.log(data))
-      return  res.status(200).send({
-        success: 'true',
-        message: 'CAF description provided successfully'
-      });
+        .then(data=>res.status(200).send({
+          success: 'true',
+          message: 'CAF description provided successfully',
+          noderedResponse: data
+        }))
+        .catch(error =>res.status(400).send({
+          success: 'false',
+          message: "",
+          noderedResponse: error
+        }) );
+
     }
   }
-
-
 }
+
 
 const flowsController = new FlowsController();
 export default flowsController;
