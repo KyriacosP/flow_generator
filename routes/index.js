@@ -6,5 +6,6 @@ const router = express.Router();
 router.get('/', flowsController.info);
 router.get('/info', flowsController.info);
 router.post('/generate', flowsController.generateFlow);
+router.post('/forward',flowsController.forward);
 
 export default router;

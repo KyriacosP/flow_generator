@@ -1,8 +1,7 @@
 class HttpNode {
-  constructor(id,type,z){
+  constructor(id,type){
     this.id=id;
     this.type=type;
-    this.z=z;
     this.name="";
     this.x=100;
     this.y=100;
@@ -19,8 +18,8 @@ class HttpNode {
 }
 
 class HttpNodeIn extends HttpNode{
-  constructor(id,z,url){
-    super(id,"http in",z);
+  constructor(id,url){
+    super(id,"http in");
     this.url=url;
     this.method="get";
     this.upload=false;
@@ -29,16 +28,16 @@ class HttpNodeIn extends HttpNode{
 }
 
 class HttpNodeResponse extends HttpNode{
-  constructor(id,z){
-    super(id,"http response",z);
+  constructor(id){
+    super(id,"http response");
     this.statusCode="";
     this.headers={};
   }
 }
 
 class HttpNodeRequest extends HttpNode{
-  constructor(id,z){
-    super(id,"http request",z);
+  constructor(id){
+    super(id,"http request");
     this.method="GET";
     this.ret="txt";
     this.url="";

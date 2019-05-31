@@ -1,8 +1,7 @@
 class FunctionNode {
-  constructor(id,z,func){
+  constructor(id,func){
     this.id=id;
     this.type="function";
-    this.z=z;
     this.name="";
     this.func=func;
     this.outputs=1;
