@@ -25,6 +25,8 @@ function addResponses(meth,resp){
       if(resp[j].partof===i){
         delete resp[j].parameters;
         delete resp[j].partof;
+        delete resp[j].parentId;
+        delete resp[j].tableData;
         meth[i].responses.push(resp[j]);
       }
     }
@@ -72,8 +74,8 @@ function funcSetVar(){
   return (
     `var res={};
     flow.set("res",res);
-    for(var i in req.query){
-      msg[i]=req.query[i];
+    for(var i in msg.req.query){
+      msg[i]=msg.req.query[i];
     }
     return msg;`
   );
@@ -98,10 +100,13 @@ function funcPrepReq(baseurl,meth){
 function funcStoreData(meth){
   let res=``;
   for(let i in meth.responses){
-    res+=`res["${meth.responses[i].name}"]=msg.payload["${meth.responses[i].name}"];\n`;
+    if(!meth.responses[i].path.includes("Array")){
+      res+=`_.set(res,"${meth.responses[i].path}",_.get(msg.payload,"${meth.responses[i].path}"));\n`;
+    }
   }
   return (
-    `msg.payload=JSON.parse(msg.payload);
+    `var _ = global.get('lodash');
+    msg.payload=JSON.parse(msg.payload);
     var res=flow.get("res");
     ${res}
     flow.set("res",res);
