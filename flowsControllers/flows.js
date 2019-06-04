@@ -76,6 +76,7 @@ class FlowsController {
       let ajv=new Ajv();
       let valid=ajv.validate(blueprintSchemaExposedAPI,newOpenAPi);
       console.log(valid);
+      console.log(JSON.stringify(newOpenAPi,null,2));
       return res.status(200).send({
           success: 'true',
           msg: 'CAF description provided successfully',
@@ -96,9 +97,10 @@ class FlowsController {
       });
     } else {
       //validate against schema
-      let ajv=new Ajv();
-      let valid=ajv.validate(blueprintSchema,req.body);
-      if (!valid) console.log(ajv.errors);
+      // let ajv=new Ajv();
+      // let valid=ajv.validate(blueprintSchema,req.body);
+      // if (!valid) console.log(ajv.errors);
+      console.log(JSON.stringify(req.body,null,4));
       return res.status(200).send({
         success: 'true',
         msg: 'CAF description forwarded successfully'
