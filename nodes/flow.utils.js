@@ -1,3 +1,6 @@
+//a file containing utils for Flow class
+
+//returns an array of unique objects based on name and in properties
 function unique(array) {
   var arr = [];
   for(var i = 0; i < array.length; i++) {
@@ -8,6 +11,7 @@ function unique(array) {
   return arr;
 }
 
+//transforms an array to object using array.reduce()
 function arrayToObject(array){
   return array.reduce((obj,item)=>{
     obj[item]={
@@ -19,6 +23,7 @@ function arrayToObject(array){
   },{});
 }
 
+//adds responses to meth object deleting unnecessary properties
 function addResponses(meth,resp){
   for(let i in meth){
     for(let j in resp){
@@ -34,6 +39,7 @@ function addResponses(meth,resp){
   return meth;
 }
 
+//generates schema property of openapi spec
 function generateSchema(meth){
   let schema={
     type:"object",
@@ -49,6 +55,7 @@ function generateSchema(meth){
   return schema;
 }
 
+//adds params and path to meth object
 function addParamsAndPath(meth,exposedAPI){
   for(let i in exposedAPI.paths){
     if(Object.prototype.hasOwnProperty.call(meth,exposedAPI.paths[i].get.operationId)){
@@ -59,6 +66,7 @@ function addParamsAndPath(meth,exposedAPI){
   return meth;
 }
 
+//creates the url of the Http input node
 function createEntryUrl(meth,parameters){
   let par=parameters || meth.parameters;
   let url="/"+meth.operationId;
@@ -70,6 +78,7 @@ function createEntryUrl(meth,parameters){
   return url;
 }
 
+//returns the code for the first function node
 function funcSetVar(){
   return (
     `var res={};
@@ -81,6 +90,7 @@ function funcSetVar(){
   );
 }
 
+//creates the code for the prepare request function node
 function funcPrepReq(baseurl,meth){
   let url=baseurl+meth.path+"?";
   for(let i in meth.parameters){
@@ -97,6 +107,7 @@ function funcPrepReq(baseurl,meth){
   );
 }
 
+//creates the code for the storedata function node after a request to the original api has been made
 function funcStoreData(meth){
   let res=``;
   if(!meth.responses[0].path.includes("Array")){
@@ -122,6 +133,7 @@ function funcStoreData(meth){
   );
 }
 
+//returns the code for the final function node
 function funcPrepRes(){
   return (
     `var res=flow.get("res");
@@ -130,6 +142,7 @@ function funcPrepRes(){
   );
 }
 
+//generate x-data-sources property of openapi spec
 function generateDataSources(methUsed,exposedAPI){
   let sources=[];
   for(let i in exposedAPI.paths){

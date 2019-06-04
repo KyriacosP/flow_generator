@@ -53,7 +53,7 @@ class FlowsController {
         //create flow from method
         let path=f.createFromMethod(methods[i],exposedAPI);
         newOpenAPi.EXPOSED_API.paths[Object.keys(path)[0]]=path[Object.keys(path)[0]];
-        // // post flow to NODERED
+        // post flow to NODERED
         await fetch('http://localhost:1880/flow', {
           method: 'POST',
           headers: {
@@ -72,6 +72,7 @@ class FlowsController {
         .then(data=>noderedResponse.push(data))
         .catch(error =>noderedResponse.push(error));
       }
+      //validate new openapiSpec against schema
       let ajv=new Ajv();
       let valid=ajv.validate(blueprintSchemaExposedAPI,newOpenAPi);
       console.log(valid);
@@ -94,6 +95,7 @@ class FlowsController {
         msg: 'No CAF description provided'
       });
     } else {
+      //validate against schema
       let ajv=new Ajv();
       let valid=ajv.validate(blueprintSchema,req.body);
       if (!valid) console.log(ajv.errors);
