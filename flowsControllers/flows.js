@@ -53,8 +53,7 @@ class FlowsController {
         //create flow from method
         let path=f.createFromMethod(methods[i],exposedAPI);
         newOpenAPi.EXPOSED_API.paths[Object.keys(path)[0]]=path[Object.keys(path)[0]];
-        console.log(f);
-        // post flow to NODERED
+        // // post flow to NODERED
         await fetch('http://localhost:1880/flow', {
           method: 'POST',
           headers: {

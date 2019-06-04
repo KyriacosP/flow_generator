@@ -99,10 +99,18 @@ function funcPrepReq(baseurl,meth){
 
 function funcStoreData(meth){
   let res=``;
-  for(let i in meth.responses){
-    if(!meth.responses[i].path.includes("Array")){
+  if(!meth.responses[0].path.includes("Array")){
+    for(let i in meth.responses){
       res+=`_.set(res,"${meth.responses[i].path}",_.get(msg.payload,"${meth.responses[i].path}"));\n`;
     }
+  }else{
+    res+=`res.array=[];
+    for(let i in msg.payload){
+      res.array[i]={};\n`;
+    for(let i in meth.responses){
+      res+=`_.set(res.array[i],"${meth.responses[i].path.replace('Array.','')}",_.get(msg.payload[i],"${meth.responses[i].path.replace('Array.','')}"));\n`;
+    }
+    res+=`}\n`;
   }
   return (
     `var _ = global.get('lodash');
