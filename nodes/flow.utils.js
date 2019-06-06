@@ -1,5 +1,5 @@
 //a file containing utils for Flow class
-
+import _ from 'lodash'
 //returns an array of unique objects based on name and in properties
 function unique(array) {
   var arr = [];
@@ -47,9 +47,37 @@ function generateSchema(meth){
   }
   for(let i in meth){
     for(let j in meth[i].responses){
-      schema.properties[meth[i].responses[j].name]={
-        type:meth[i].responses[j].type
-      };
+      let path=meth[i].responses[j].path.split(".");
+      let newP=[];
+      for(let z=0;z<path.length;z++){
+        if(path[z]==="oneOf" || path[z].includes("schema")){
+          continue;
+        }
+        if(path[z]==="Array"){
+          newP.push("array");
+          if(!_.has(schema.properties,newP)){
+            _.set(schema.properties,newP,{type:"array"});
+          }
+          newP.push("items");
+          if(!_.has(schema.properties,newP)){
+            _.set(schema.properties,newP,{type:"object"});
+          }
+          newP.push("properties");
+          continue;
+        }
+        if(z<path.length-1){
+          newP.push(path[z]);
+          if(!_.has(schema.properties,newP)){
+            _.set(schema.properties,newP,{type:"object"});
+          }
+          newP.push("properties");
+          continue;
+        }
+        if(z===(path.length-1)){
+          newP.push(path[z]);
+          _.set(schema.properties,newP,{type:meth[i].responses[j].type});
+        }
+      }
     };
   };
   return schema;
@@ -109,6 +137,11 @@ function funcPrepReq(baseurl,meth){
 
 //creates the code for the storedata function node after a request to the original api has been made
 function funcStoreData(meth){
+  for(let i in meth.responses){
+    if(meth.responses[i].path.includes("oneOf")){
+      meth.responses[i].path=meth.responses[i].path.split(".").slice(2).join(".");
+    }
+  }
   let res=``;
   if(!meth.responses[0].path.includes("Array")){
     for(let i in meth.responses){
@@ -118,40 +151,40 @@ function funcStoreData(meth){
     res+=`res.array=[];
     for(let i in msg.payload){
       res.array[i]={};\n`;
-    for(let i in meth.responses){
-      res+=`_.set(res.array[i],"${meth.responses[i].path.replace('Array.','')}",_.get(msg.payload[i],"${meth.responses[i].path.replace('Array.','')}"));\n`;
+      for(let i in meth.responses){
+        res+=`_.set(res.array[i],"${meth.responses[i].path.replace('Array.','')}",_.get(msg.payload[i],"${meth.responses[i].path.replace('Array.','')}"));\n`;
+      }
+      res+=`}\n`;
     }
-    res+=`}\n`;
+    return (
+      `var _ = global.get('lodash');
+      msg.payload=JSON.parse(msg.payload);
+      var res=flow.get("res");
+      ${res}
+      flow.set("res",res);
+      return msg;`
+    );
   }
-  return (
-    `var _ = global.get('lodash');
-    msg.payload=JSON.parse(msg.payload);
-    var res=flow.get("res");
-    ${res}
-    flow.set("res",res);
-    return msg;`
-  );
-}
 
-//returns the code for the final function node
-function funcPrepRes(){
-  return (
-    `var res=flow.get("res");
-    msg.payload=res;
-    return msg;`
-  );
-}
+  //returns the code for the final function node
+  function funcPrepRes(){
+    return (
+      `var res=flow.get("res");
+      msg.payload=res;
+      return msg;`
+    );
+  }
 
-//generate x-data-sources property of openapi spec
-function generateDataSources(methUsed,exposedAPI){
-  let sources=[];
-  for(let i in exposedAPI.paths){
-    if(methUsed.includes(exposedAPI.paths[i].get.operationId)){
-      sources=sources.concat(exposedAPI.paths[i].get["x-data-sources"]);
+  //generate x-data-sources property of openapi spec
+  function generateDataSources(methUsed,exposedAPI){
+    let sources=[];
+    for(let i in exposedAPI.paths){
+      if(methUsed.includes(exposedAPI.paths[i].get.operationId)){
+        sources=sources.concat(exposedAPI.paths[i].get["x-data-sources"]);
+      }
     }
+    sources=[...new Set(sources)];
+    return sources;
   }
-  sources=[...new Set(sources)];
-  return sources;
-}
 
-export {generateDataSources,unique,arrayToObject,addResponses,generateSchema,addParamsAndPath,createEntryUrl,funcSetVar,funcPrepReq,funcStoreData,funcPrepRes};
+  export {generateDataSources,unique,arrayToObject,addResponses,generateSchema,addParamsAndPath,createEntryUrl,funcSetVar,funcPrepReq,funcStoreData,funcPrepRes};
